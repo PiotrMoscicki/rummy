@@ -31,23 +31,36 @@ pub enum Suit {
 //------------------------------------------------------------------------------------------------
 #[derive(Debug, Copy, Clone)]
 pub struct Card {
-    pub m_suit : Rank,
-    pub m_rank : Suit
+    pub m_rank: Rank,
+    pub m_suit: Suit
 }
 
 //------------------------------------------------------------------------------------------------
 #[derive(Debug, Clone)]
 pub struct Deck {
-    m_cards : Vec<Card>
+    m_cards: Vec<Card>
 }
 
 //------------------------------------------------------------------------------------------------
 impl Deck {
-    pub fn cards(&self) -> &Vec<Card> { self.m_cards; }
+    pub fn cards(&self) -> &Vec<Card> { return &self.m_cards; }
 
-    pub fn add(&mut self, card : &Card) {
+    pub fn add(&mut self, card: &Card) {
         self.m_cards.push(*card);
     }
+}
+
+//------------------------------------------------------------------------------------------------
+fn find_four_of_kind(kind: Kind, deck: &Deck) -> Vec<usize> {
+    Vec<usize> indices;
+    
+    for idx in 0.. deck.cards().len() {
+        if card.kind == kind {
+            indices.add(idx);
+        }
+    }
+
+    return indices;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -60,11 +73,14 @@ fn main() {
 //------------------------------------------------------------------------------------------------
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     //--------------------------------------------------------------------------------------------
     #[test]
     fn find_four_of_kind() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
+        let hand : Deck;
+        hand.add( &Card { m_rank: Rank::Ace, m_suit: Suit::Spade } );
+        assert_eq!(4, 4);
     }
 }
 
