@@ -1,7 +1,7 @@
 use std::vec::Vec;
 
 //------------------------------------------------------------------------------------------------
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Rank {
     Ace,
     One,
@@ -20,7 +20,7 @@ pub enum Rank {
 }
 
 //------------------------------------------------------------------------------------------------
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Suit {
     Club,
     Spade,
@@ -29,7 +29,7 @@ pub enum Suit {
 }
 
 //------------------------------------------------------------------------------------------------
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Card {
     pub m_rank: Rank,
     pub m_suit: Suit
@@ -43,6 +43,12 @@ pub struct Deck {
 
 //------------------------------------------------------------------------------------------------
 impl Deck {
+    pub fn new() -> Deck {
+        return Deck {
+            m_cards: vec!()
+        };
+    }
+
     pub fn cards(&self) -> &Vec<Card> { return &self.m_cards; }
 
     pub fn add(&mut self, card: &Card) {
@@ -51,12 +57,12 @@ impl Deck {
 }
 
 //------------------------------------------------------------------------------------------------
-fn find_four_of_kind(kind: Kind, deck: &Deck) -> Vec<usize> {
-    Vec<usize> indices;
+pub fn find_same_rank(rank: Rank, deck: &Deck) -> Vec<std::primitive::usize> {
+    let mut indices : Vec<std::primitive::usize> = vec!();
     
     for idx in 0.. deck.cards().len() {
-        if card.kind == kind {
-            indices.add(idx);
+        if deck.cards()[idx].m_rank == rank {
+            indices.push(idx);
         }
     }
 
@@ -77,8 +83,8 @@ mod tests {
 
     //--------------------------------------------------------------------------------------------
     #[test]
-    fn find_four_of_kind() {
-        let hand : Deck;
+    fn find_four_of_rank() {
+        let mut hand = Deck::new();
         hand.add( &Card { m_rank: Rank::Ace, m_suit: Suit::Spade } );
         assert_eq!(4, 4);
     }
