@@ -74,8 +74,19 @@ impl Deck {
 
     pub fn len(&self) -> usize { return self.m_cards.len(); }
 
-    pub fn add(&mut self, card:&Card) {
+    pub fn add(&mut self, card: &Card) {
         self.m_cards.push(*card);
+    }
+
+    pub fn add_ordered_by_rank(&mut self, card: &Card) {
+        for idx in 0.. m_cards.len() {
+            if m_cards[idx].m_rank > card.rank {
+                m_cards.insert(idx, card);
+                return;
+            }
+        }
+
+        m_cards.push(card);
     }
 }
 
@@ -103,9 +114,13 @@ pub fn find_set(rank: Rank, deck: &Deck) -> Vec<usize> {
 }
 
 pub fn find_run(element: &Card, deck: &Deck) -> Vec<usize> {
-    let mut indices : Vec>usize> = vec!();
+    let mut sorted_same_suit_deck = Deck::new();
 
-    for 
+    for card in deck {
+        if card.suit == element.suit {
+
+        }
+    }
 
     return indices;
 }
