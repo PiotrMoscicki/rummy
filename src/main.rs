@@ -74,11 +74,11 @@ impl Deck {
 
     pub fn len(&self) -> usize { return self.m_cards.len(); }
 
-    pub fn add(&mut self, card: &Card) {
+    pub fn push(&mut self, card: &Card) {
         self.m_cards.push(*card);
     }
 
-    pub fn add_ordered_by_rank(&mut self, card: &Card) {
+    pub fn insert_ordered_by_rank(&mut self, card: &Card) {
         for idx in 0.. m_cards.len() {
             if m_cards[idx].m_rank > card.rank {
                 m_cards.insert(idx, card);
