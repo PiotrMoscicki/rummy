@@ -98,15 +98,6 @@ impl Index<usize> for Deck {
     }
 }
 
-impl IntoIterator for &Deck {
-    type Item = <Vec<Card> as IntoIterator>::Item;
-    type IntoIter = <Vec<Card> as IntoIterator>::IntoIter;
-
-    fn into_iter(self) -> Self::IntoIter {
-        return self.cards.into_iter();
-    }
-}
-
 //------------------------------------------------------------------------------------------------
 pub fn find_set(rank: Rank, deck: &Deck) -> Vec<usize> {
     let mut indices : Vec<usize> = vec!();
@@ -124,16 +115,17 @@ pub fn find_set(rank: Rank, deck: &Deck) -> Vec<usize> {
     return indices;
 }
 
+//------------------------------------------------------------------------------------------------
 pub fn find_run(element: &Card, deck: &Deck) -> Vec<usize> {
     let mut sorted_same_suit_deck = Deck::new();
 
-    for card in deck {
-        if card.suit == element.suit {
-            sorted_same_suit_deck.insert_ordered_by_rank(&card);
+    for idx in 0.. deck.len() {
+        if deck[idx].suit == element.suit {
+            sorted_same_suit_deck.insert_ordered_by_rank(&deck[idx]);
         }
     }
     
-    let mut indices : Vec<usize> = vec!();
+    let indices : Vec<usize> = vec!();
     
     return indices;
 }
