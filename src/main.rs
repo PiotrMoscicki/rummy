@@ -7,7 +7,7 @@ use std:: {
 //------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub enum Rank {
     Ace,
     One,
@@ -28,7 +28,7 @@ pub enum Rank {
 //------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub enum Suit {
     Club,
     Spade,
@@ -41,14 +41,14 @@ pub enum Suit {
 //------------------------------------------------------------------------------------------------
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Card {
-    pub m_rank: Rank,
-    pub m_suit: Suit
+    pub rank: Rank,
+    pub suit: Suit
 }
 
 //------------------------------------------------------------------------------------------------
 impl Card {
     pub fn new(rank: Rank, suit: Suit) -> Self {
-        return Card{ m_rank: rank, m_suit: suit };
+        return Card{ rank: rank, suit: suit };
     }
 }
 
@@ -57,7 +57,7 @@ impl Card {
 //------------------------------------------------------------------------------------------------
 #[derive(Debug, Clone)]
 pub struct Deck {
-    m_cards: Vec<Card>
+    cards: Vec<Card>
 }
 
 //------------------------------------------------------------------------------------------------
@@ -66,27 +66,27 @@ pub struct Deck {
 impl Deck {
     pub fn new() -> Deck {
         return Deck {
-            m_cards: vec!()
+            cards: vec!()
         };
     }
 
-    pub fn cards(&self) -> &Vec<Card> { return &self.m_cards; }
+    pub fn cards(&self) -> &Vec<Card> { return &self.cards; }
 
-    pub fn len(&self) -> usize { return self.m_cards.len(); }
+    pub fn len(&self) -> usize { return self.cards.len(); }
 
     pub fn push(&mut self, card: &Card) {
-        self.m_cards.push(*card);
+        self.cards.push(*card);
     }
 
     pub fn insert_ordered_by_rank(&mut self, card: &Card) {
-        for idx in 0.. m_cards.len() {
-            if m_cards[idx].m_rank > card.rank {
-                m_cards.insert(idx, card);
+        for idx in 0.. self.cards.len() {
+            if self.cards[idx].rank > card.rank {
+                self.cards.insert(idx, *card);
                 return;
             }
         }
 
-        m_cards.push(card);
+        self.cards.push(*card);
     }
 }
 
@@ -94,7 +94,16 @@ impl Index<usize> for Deck {
     type Output = Card;
 
     fn index(&self, idx: usize) -> &Self::Output {
-        return &self.m_cards[idx];
+        return &self.cards[idx];
+    }
+}
+
+impl IntoIterator for &Deck {
+    type Item = <Vec<Card> as IntoIterator>::Item;
+    type IntoIter = <Vec<Card> as IntoIterator>::IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        return self.cards.into_iter();
     }
 }
 
@@ -103,12 +112,14 @@ pub fn find_set(rank: Rank, deck: &Deck) -> Vec<usize> {
     let mut indices : Vec<usize> = vec!();
     
     for idx in 0.. deck.len() {
-        if deck[idx].m_rank == rank {
+        if deck[idx].rank == rank {
             indices.push(idx);
         }
     }
 
-    if indices
+    if indices.len() < 3 {
+        indices.clear();
+    }
 
     return indices;
 }
@@ -118,10 +129,12 @@ pub fn find_run(element: &Card, deck: &Deck) -> Vec<usize> {
 
     for card in deck {
         if card.suit == element.suit {
-
+            sorted_same_suit_deck.insert_ordered_by_rank(&card);
         }
     }
-
+    
+    let mut indices : Vec<usize> = vec!();
+    
     return indices;
 }
 
@@ -139,22 +152,22 @@ mod tests {
 
     //--------------------------------------------------------------------------------------------
     #[test]
-    fn find_set() {
+    fn find_set_test() {
         let mut hand = Deck::new();
-        hand.add(&Card::new(Rank::Ace, Suit::Spade));
-        hand.add(&Card::new(Rank::Ace, Suit::Club));
-        hand.add(&Card::new(Rank::Ace, Suit::Diamond));
-        hand.add(&Card::new(Rank::Ace, Suit::Heart));
-        hand.add(&Card::new(Rank::Queen, Suit::Spade));
-        hand.add(&Card::new(Rank::Queen, Suit::Club));
-        hand.add(&Card::new(Rank::Queen, Suit::Diamond));
-        hand.add(&Card::new(Rank::King, Suit::Heart));
-        hand.add(&Card::new(Rank::King, Suit::Spade));
-        hand.add(&Card::new(Rank::Jack, Suit::Club));
-        hand.add(&Card::new(Rank::Ten, Suit::Diamond));
-        hand.add(&Card::new(Rank::Nine, Suit::Heart));
-        hand.add(&Card::new(Rank::Seven, Suit::Spade));
-        hand.add(&Card::new(Rank::Four, Suit::Club));
+        hand.push(&Card::new(Rank::Ace, Suit::Spade));
+        hand.push(&Card::new(Rank::Ace, Suit::Club));
+        hand.push(&Card::new(Rank::Ace, Suit::Diamond));
+        hand.push(&Card::new(Rank::Ace, Suit::Heart));
+        hand.push(&Card::new(Rank::Queen, Suit::Spade));
+        hand.push(&Card::new(Rank::Queen, Suit::Club));
+        hand.push(&Card::new(Rank::Queen, Suit::Diamond));
+        hand.push(&Card::new(Rank::King, Suit::Heart));
+        hand.push(&Card::new(Rank::King, Suit::Spade));
+        hand.push(&Card::new(Rank::Jack, Suit::Club));
+        hand.push(&Card::new(Rank::Ten, Suit::Diamond));
+        hand.push(&Card::new(Rank::Nine, Suit::Heart));
+        hand.push(&Card::new(Rank::Seven, Suit::Spade));
+        hand.push(&Card::new(Rank::Four, Suit::Club));
 
         let aces = find_set(Rank::Ace, &hand);
         assert_eq!(aces.len(), 4);
@@ -180,20 +193,20 @@ mod tests {
     /*#[test]
     fn find_run() {
         let mut hand = Deck::new();
-        hand.add(&Card::new(Rank::Ace, Suit::Spade));
-        hand.add(&Card::new(Rank::Ace, Suit::Club));
-        hand.add(&Card::new(Rank::Ace, Suit::Diamond));
-        hand.add(&Card::new(Rank::Ace, Suit::Heart));
-        hand.add(&Card::new(Rank::Queen, Suit::Spade));
-        hand.add(&Card::new(Rank::Queen, Suit::Club));
-        hand.add(&Card::new(Rank::Queen, Suit::Diamond));
-        hand.add(&Card::new(Rank::King, Suit::Heart));
-        hand.add(&Card::new(Rank::King, Suit::Spade));
-        hand.add(&Card::new(Rank::Jack, Suit::Club));
-        hand.add(&Card::new(Rank::Ten, Suit::Diamond));
-        hand.add(&Card::new(Rank::Nine, Suit::Heart));
-        hand.add(&Card::new(Rank::Seven, Suit::Spade));
-        hand.add(&Card::new(Rank::Four, Suit::Club));
+        hand.push(&Card::new(Rank::Ace, Suit::Spade));
+        hand.push(&Card::new(Rank::Ace, Suit::Club));
+        hand.push(&Card::new(Rank::Ace, Suit::Diamond));
+        hand.push(&Card::new(Rank::Ace, Suit::Heart));
+        hand.push(&Card::new(Rank::Queen, Suit::Spade));
+        hand.push(&Card::new(Rank::Queen, Suit::Club));
+        hand.push(&Card::new(Rank::Queen, Suit::Diamond));
+        hand.push(&Card::new(Rank::King, Suit::Heart));
+        hand.push(&Card::new(Rank::King, Suit::Spade));
+        hand.push(&Card::new(Rank::Jack, Suit::Club));
+        hand.push(&Card::new(Rank::Ten, Suit::Diamond));
+        hand.push(&Card::new(Rank::Nine, Suit::Heart));
+        hand.push(&Card::new(Rank::Seven, Suit::Spade));
+        hand.push(&Card::new(Rank::Four, Suit::Club));
 
         let aces = find_same_rank(Rank::Ace, &hand);
         assert_eq!(aces.len(), 4);
