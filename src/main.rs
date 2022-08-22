@@ -117,15 +117,29 @@ pub fn find_set(rank: Rank, deck: &Deck) -> Vec<usize> {
 
 //------------------------------------------------------------------------------------------------
 pub fn find_run(element: &Card, deck: &Deck) -> Vec<usize> {
-    let mut sorted_same_suit_deck = Deck::new();
+    let mut sorted_same_suit_indices: Vec<usize> = vec!();
 
     for idx in 0.. deck.len() {
         if deck[idx].suit == element.suit {
-            sorted_same_suit_deck.insert_ordered_by_rank(&deck[idx]);
+            let dst 
+                = sorted_same_suit_indices.iter().position(|&x| deck[x].suit > element.suit);
+
+            match dst {
+                Some(dst) => {
+                    sorted_same_suit_indices.insert(dst, idx);
+                },
+                None => {
+                    sorted_same_suit_indices.push(idx);
+                }
+            }
         }
     }
     
-    let indices : Vec<usize> = vec!();
+    let mut indices : Vec<usize> = vec!();
+
+    for idx in sorted_same_suit_indices {
+        indices.push(idx);
+    }
     
     return indices;
 }
