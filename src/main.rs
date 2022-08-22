@@ -138,6 +138,7 @@ pub fn find_run(element: &Card, deck: &Deck) -> Vec<usize> {
     let mut indices : Vec<usize> = vec!();
 
     for idx in sorted_same_suit_indices {
+        
         indices.push(idx);
     }
     
