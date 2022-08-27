@@ -9,20 +9,19 @@ use std:: {
 //------------------------------------------------------------------------------------------------
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
 pub enum Rank {
-    Ace,
-    One,
-    Two,
-    Three,
-    Four,
-    Five,
-    Six,
-    Seven,
-    Eight,
-    Nine,
-    Ten,
-    Jack,
-    Queen,
-    King 
+    Ace = 1,
+    Two = 2,
+    Three = 3,
+    Four = 4,
+    Five = 5,
+    Six = 6,
+    Seven = 7,
+    Eight = 8,
+    Nine = 9,
+    Ten = 10,
+    Jack = 11,
+    Queen = 12,
+    King = 13 
 }
 
 //------------------------------------------------------------------------------------------------
@@ -99,7 +98,8 @@ impl Index<usize> for Deck {
 }
 
 //------------------------------------------------------------------------------------------------
-pub fn find_set(rank: Rank, deck: &Deck) -> Vec<usize> {
+pub fn find_set(card_idx: usize, deck: &Deck) -> Vec<usize> {
+    let rank = deck[card_idx].rank;
     let mut indices : Vec<usize> = vec!();
     
     for idx in 0.. deck.len() {
@@ -116,13 +116,14 @@ pub fn find_set(rank: Rank, deck: &Deck) -> Vec<usize> {
 }
 
 //------------------------------------------------------------------------------------------------
-pub fn find_run(element: &Card, deck: &Deck) -> Vec<usize> {
+pub fn find_run(card_idx: usize, deck: &Deck) -> Vec<usize> {
+    let element = deck[card_idx];
     let mut sorted_same_suit_indices: Vec<usize> = vec!();
 
     for idx in 0.. deck.len() {
         if deck[idx].suit == element.suit {
             let dst 
-                = sorted_same_suit_indices.iter().position(|&x| deck[x].suit > element.suit);
+                = sorted_same_suit_indices.iter().position(|&x| deck[x].rank > deck[idx].rank);
 
             match dst {
                 Some(dst) => {
@@ -138,8 +139,20 @@ pub fn find_run(element: &Card, deck: &Deck) -> Vec<usize> {
     let mut indices : Vec<usize> = vec!();
 
     for idx in sorted_same_suit_indices {
-        
+        match indices.last() {
+            Some(prev_idx) => {
+                if deck[*prev_idx].rank as usize + 1 != deck[idx].rank as usize {
+                    indices.clear();
+                }
+            },
+            None => {}
+        }
+
         indices.push(idx);
+    }
+
+    if indices.len() < 3 {
+        indices.clear();
     }
     
     return indices;
@@ -176,66 +189,71 @@ mod tests {
         hand.push(&Card::new(Rank::Seven, Suit::Spade));
         hand.push(&Card::new(Rank::Four, Suit::Club));
 
-        let aces = find_set(Rank::Ace, &hand);
+        let aces = find_set(0, &hand);
         assert_eq!(aces.len(), 4);
         assert_eq!(aces[0], 0);
         assert_eq!(aces[1], 1);
         assert_eq!(aces[2], 2);
         assert_eq!(aces[3], 3);
 
-        let queens = find_set(Rank::Queen, &hand);
+        let queens = find_set(4, &hand);
         assert_eq!(queens.len(), 3);
         assert_eq!(queens[0], 4);
         assert_eq!(queens[1], 5);
         assert_eq!(queens[2], 6);
 
-        let kings = find_set(Rank::King, &hand);
+        let kings = find_set(7, &hand);
         assert_eq!(kings.len(), 0);
 
-        let jacks = find_set(Rank::Jack, &hand);
+        let jacks = find_set(9, &hand);
         assert_eq!(jacks.len(), 0);
     }
 
     //--------------------------------------------------------------------------------------------
-    /*#[test]
-    fn find_run() {
-        let mut hand = Deck::new();
-        hand.push(&Card::new(Rank::Ace, Suit::Spade));
-        hand.push(&Card::new(Rank::Ace, Suit::Club));
-        hand.push(&Card::new(Rank::Ace, Suit::Diamond));
-        hand.push(&Card::new(Rank::Ace, Suit::Heart));
-        hand.push(&Card::new(Rank::Queen, Suit::Spade));
-        hand.push(&Card::new(Rank::Queen, Suit::Club));
-        hand.push(&Card::new(Rank::Queen, Suit::Diamond));
-        hand.push(&Card::new(Rank::King, Suit::Heart));
-        hand.push(&Card::new(Rank::King, Suit::Spade));
-        hand.push(&Card::new(Rank::Jack, Suit::Club));
-        hand.push(&Card::new(Rank::Ten, Suit::Diamond));
-        hand.push(&Card::new(Rank::Nine, Suit::Heart));
-        hand.push(&Card::new(Rank::Seven, Suit::Spade));
-        hand.push(&Card::new(Rank::Four, Suit::Club));
+    #[test]
+    fn find_run_test() {
+        {
+            let mut hand = Deck::new();
+            hand.push(&Card::new(Rank::Ace, Suit::Spade));
+            hand.push(&Card::new(Rank::Two, Suit::Spade));
+            hand.push(&Card::new(Rank::Three, Suit::Spade));
 
-        let aces = find_same_rank(Rank::Ace, &hand);
-        assert_eq!(aces.len(), 4);
-        assert_eq!(aces[0], 0);
-        assert_eq!(aces[1], 1);
-        assert_eq!(aces[2], 2);
-        assert_eq!(aces[3], 3);
+            let run = find_run(0, &hand);
+            assert_eq!(run.len(), 3);
+            assert_eq!(run[0], 0);
+            assert_eq!(run[1], 1);
+            assert_eq!(run[2], 2);
+        }
+        {
+            let mut hand = Deck::new();
+            hand.push(&Card::new(Rank::Ace, Suit::Spade));
+            hand.push(&Card::new(Rank::Four, Suit::Spade));
+            hand.push(&Card::new(Rank::Three, Suit::Spade));
 
-        let queens = find_same_rank(Rank::Queen, &hand);
-        assert_eq!(queens.len(), 3);
-        assert_eq!(queens[0], 4);
-        assert_eq!(queens[1], 5);
-        assert_eq!(queens[2], 6);
+            let run = find_run(0, &hand);
+            assert_eq!(run.len(), 0);
+        }
+        {
+            let mut hand = Deck::new();
+            hand.push(&Card::new(Rank::Ace, Suit::Spade));
+            hand.push(&Card::new(Rank::Two, Suit::Club));
+            hand.push(&Card::new(Rank::Three, Suit::Spade));
 
-        let kings = find_same_rank(Rank::King, &hand);
-        assert_eq!(kings.len(), 2);
-        assert_eq!(kings[0], 7);
-        assert_eq!(kings[1], 8);
+            let run = find_run(0, &hand);
+            assert_eq!(run.len(), 0);
+        }
+        {
+            let mut hand = Deck::new();
+            hand.push(&Card::new(Rank::Ace, Suit::Spade));
+            hand.push(&Card::new(Rank::Three, Suit::Spade));
+            hand.push(&Card::new(Rank::Two, Suit::Spade));
 
-        let jacks = find_same_rank(Rank::Jack, &hand);
-        assert_eq!(jacks.len(), 1);
-        assert_eq!(jacks[0], 9);
-    }*/
+            let run = find_run(0, &hand);
+            assert_eq!(run.len(), 3);
+            assert_eq!(run[0], 0);
+            assert_eq!(run[1], 2);
+            assert_eq!(run[2], 1);
+        }
+    }
 }
 
