@@ -63,30 +63,11 @@ pub struct Deck {
 //------------------------------------------------------------------------------------------------
 //------------------------------------------------------------------------------------------------
 impl Deck {
-    pub fn new() -> Deck {
-        return Deck {
-            cards: vec!()
-        };
-    }
+    pub fn new() -> Deck { return Deck { cards: vec!() }; }
 
     pub fn cards(&self) -> &Vec<Card> { return &self.cards; }
-
     pub fn len(&self) -> usize { return self.cards.len(); }
-
-    pub fn push(&mut self, card: &Card) {
-        self.cards.push(*card);
-    }
-
-    pub fn insert_ordered_by_rank(&mut self, card: &Card) {
-        for idx in 0.. self.cards.len() {
-            if self.cards[idx].rank > card.rank {
-                self.cards.insert(idx, *card);
-                return;
-            }
-        }
-
-        self.cards.push(*card);
-    }
+    pub fn push(&mut self, card: &Card) { self.cards.push(*card); }
 }
 
 impl Index<usize> for Deck {
@@ -142,6 +123,9 @@ pub fn find_run(card_idx: usize, deck: &Deck) -> Vec<usize> {
         match indices.last() {
             Some(prev_idx) => {
                 if deck[*prev_idx].rank as usize + 1 != deck[idx].rank as usize {
+                    if indices.iter().find(|x| **x == card_idx).is_some() {
+                        break;
+                    }
                     indices.clear();
                 }
             },
@@ -253,6 +237,21 @@ mod tests {
             assert_eq!(run[0], 0);
             assert_eq!(run[1], 2);
             assert_eq!(run[2], 1);
+        }
+        {
+            let mut hand = Deck::new();
+            hand.push(&Card::new(Rank::Queen, Suit::Heart));
+            hand.push(&Card::new(Rank::Ace, Suit::Spade));
+            hand.push(&Card::new(Rank::Three, Suit::Spade));
+            hand.push(&Card::new(Rank::Two, Suit::Spade));
+            hand.push(&Card::new(Rank::Seven, Suit::Spade));
+            hand.push(&Card::new(Rank::Six, Suit::Club));
+
+            let run = find_run(1, &hand);
+            assert_eq!(run.len(), 3);
+            assert_eq!(run[0], 1);
+            assert_eq!(run[1], 3);
+            assert_eq!(run[2], 2);
         }
     }
 }
